@@ -1,4 +1,21 @@
 import { Router } from 'express';
+import fs from 'fs';
+import concat from 'concat-stream';
+import byline from 'byline';
+import CountiesDataStream from './streams/counties-data-stream';
+
+const processQueries = (req, res, next) => {
+  let options = {};
+  const query = req.query;
+  if (query.page && query.perPage) {
+    options.pagination = { page: parseInt(query.page), perPage: parseInt(query.perPage) };
+  }
+  if (query.state || query.county) {
+    options.filter = { state: query.state, county: query.county };
+  }
+  req.options = options;
+  next();
+};
 
 const routes = Router();
 
@@ -6,31 +23,40 @@ const routes = Router();
  * GET home page
  */
 routes.get('/', (req, res) => {
-  res.render('index', { title: 'Express Babel' });
+  res.render('index', { title: 'Health data visualizer' });
 });
 
-/**
- * GET /list
- *
- * This is a sample route demonstrating
- * a simple approach to error handling and testing
- * the global error handler. You most certainly want to
- * create different/better error handlers depending on
- * your use case.
- */
-routes.get('/list', (req, res, next) => {
-  const { title } = req.query;
-
-  if (title == null || title === '') {
-    // You probably want to set the response HTTP status to 400 Bad Request
-    // or 422 Unprocessable Entity instead of the default 500 of
-    // the global error handler (e.g check out https://github.com/kbariotis/throw.js).
-    // This is just for demo purposes.
-    next(new Error('The "title" parameter is required'));
-    return;
-  }
-
-  res.render('index', { title });
+routes.get('/diabetes-prevalence', processQueries, (req, res) => {
+  const stream = byline(fs.createReadStream(__dirname + '/../public/files/diabetes-prevalence.csv'));
+  stream.pipe(new CountiesDataStream(req.options)).pipe(concat(data => { 
+    data = { years: data[0].years, labels: data[1].labels, data: data.slice(2) };
+    res.json(data);
+  }));
 });
+
+routes.get('/diabetes-incidence', processQueries, (req, res) => {
+  const stream = byline(fs.createReadStream(__dirname + '/../public/files/diabetes-incidence.csv'));
+  stream.pipe(new CountiesDataStream(req.options)).pipe(concat(data => { 
+    data = { years: data[0].years, labels: data[1].labels, data: data.slice(2) };
+    res.json(data);
+  }));
+});
+
+routes.get('/obesity-prevalence', processQueries, (req, res) => {
+  const stream = byline(fs.createReadStream(__dirname + '/../public/files/obesity-prevalence.csv'));
+  stream.pipe(new CountiesDataStream(req.options)).pipe(concat(data => { 
+    data = { years: data[0].years, labels: data[1].labels, data: data.slice(2) };
+    res.json(data);
+  }));
+});
+
+routes.get('/physical-inactivity', processQueries, (req, res) => {
+  const stream = byline(fs.createReadStream(__dirname + '/../public/files/obesity-prevalence.csv'));
+  stream.pipe(new CountiesDataStream(req.options)).pipe(concat(data => { 
+    data = { years: data[0].years, labels: data[1].labels, data: data.slice(2) };
+    res.json(data);
+  }));
+});
+
 
 export default routes;
