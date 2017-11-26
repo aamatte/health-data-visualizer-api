@@ -41,10 +41,11 @@ class CountiesSearchStream extends stream.Transform {
       this.headers = values;
     } else {
       const state = values[0];      
+      const fips = values[1];      
       const county = values[2];
       // If there is a query, skip the ones that dont match
       if (!this.optionsExists() || this.matchQuery(state, county) || this.inPaginationRange()) {
-        object = { state, county };
+        object = { state, county, fips };
       }
     } 
     if (Object.keys(object).length > 0) {

@@ -13,21 +13,10 @@ class CountiesDataStream extends stream.Transform {
     this.index = -2;
   }
 
-  getDataByYear(state, county, values) {
-    const labelsCount = {};
-    const object = { county, state };
-    
-    // Iterate over all the values
-    for (let i = 3; i < values.length; i++) {
-      // Determine the year index based on the label count
-      labelsCount[this.headers[i]] = labelsCount[this.headers[i]] !== undefined ? labelsCount[this.headers[i]] + 1 : 0;
-      const yearIndex = labelsCount[this.headers[i]];
-      // Init the year object if necessary
-      if (!object[this.years[yearIndex]]) {
-        object[this.years[yearIndex]] = [];           
-      }
-      // Add the data to the corresponding year
-      object[this.years[yearIndex]].push(values[i]);
+  getDataByYear(state, county, fips, values) {
+    const object = { county, state, fips };
+    for (let i = 0; i < this.years.length - 1; i++) {
+      object[this.years[i]] = values.slice(i * this.headers.length + 3, (i + 1) * this.headers.length + 3);
     }
     return object;
   }
@@ -58,13 +47,14 @@ class CountiesDataStream extends stream.Transform {
       // Delete repeated ones
       const labels = values.filter((elem, pos) => values.indexOf(elem) == pos); 
       object = { labels };
-      this.headers = values;
+      this.headers = labels;
     } else {
       const state = values[0];      
+      const fips = values[1];
       const county = values[2];
       // If there is a query, skip the ones that dont match
       if (!this.optionsExists() || this.matchQuery(state, county) || this.inPaginationRange()) {
-        object = this.getDataByYear(state, county, values);
+        object = this.getDataByYear(state, county, fips, values);
       }
     } 
     if (Object.keys(object).length > 0) {
