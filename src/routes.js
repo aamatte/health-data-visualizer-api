@@ -3,6 +3,7 @@ import fs from 'fs';
 import concat from 'concat-stream';
 import byline from 'byline';
 import CountiesDataStream from './streams/counties-data-stream';
+import CountiesSearchStream from './streams/counties-search-stream';
 
 const processQueries = (req, res, next) => {
   let options = {};
@@ -25,6 +26,14 @@ const routes = Router();
 routes.get('/', (req, res) => {
   res.render('index', { title: 'Health data visualizer' });
 });
+
+routes.get('/counties', processQueries, (req, res) => {
+  const stream = byline(fs.createReadStream(__dirname + '/../public/files/diabetes-incidence.csv'));
+  stream.pipe(new CountiesSearchStream(req.options)).pipe(concat(data => { 
+    res.json(data);
+  }));
+});
+
 
 routes.get('/diabetes-prevalence', processQueries, (req, res) => {
   const stream = byline(fs.createReadStream(__dirname + '/../public/files/diabetes-prevalence.csv'));

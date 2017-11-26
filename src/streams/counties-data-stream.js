@@ -10,7 +10,7 @@ class CountiesDataStream extends stream.Transform {
     this.options = options;
     this.headers = null;
     this.years = null;
-    this.index = 0;
+    this.index = -2;
   }
 
   getDataByYear(state, county, values) {
@@ -49,7 +49,6 @@ class CountiesDataStream extends stream.Transform {
   }
 
   _transform(chunk, encoding, done) {
-    this.index += 1;
     const values = chunk.toString('utf8').split(',').filter(e => e !== '');
     let object = {};
     if (!this.years) {
@@ -70,7 +69,8 @@ class CountiesDataStream extends stream.Transform {
     } 
     if (Object.keys(object).length > 0) {
       this.push(object);      
-    }    
+    }
+    this.index += 1;    
     done();
   }
 }
