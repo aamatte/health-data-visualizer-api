@@ -26,8 +26,17 @@ class CountiesDataStream extends stream.Transform {
   }
 
   matchQuery(state, county) {
-    return this.options.filter 
-            && (this.options.filter.county === county || this.options.filter.state === state);
+    if (this.options.filter && this.options.filter.county && this.options.filter.state) {
+      // Query county and state
+      return (this.options.filter.county === county && this.options.filter.state === state)
+    } else if (this.options.filter && this.options.filter.county) {
+      // Query only county
+      return this.options.filter.county === county;
+    } else if (this.options.filter && this.options.filter.state) {
+      // Query only state
+      return this.options.filter.state === state;
+    }
+    return false;
   }
 
   inPaginationRange() {    
@@ -45,7 +54,7 @@ class CountiesDataStream extends stream.Transform {
       object = { years: this.years };
     } else if (!this.headers) {
       // Delete repeated ones
-      const labels = values.filter((elem, pos) => values.indexOf(elem) == pos); 
+      const labels = values.filter((elem, pos) => values.indexOf(elem) == pos).slice(3); 
       object = { labels };
       this.headers = labels;
     } else {
@@ -58,7 +67,7 @@ class CountiesDataStream extends stream.Transform {
       }
     } 
     if (Object.keys(object).length > 0) {
-      this.push(object);      
+      this.push(object);
     }
     this.index += 1;    
     done();
