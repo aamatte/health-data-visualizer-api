@@ -29,7 +29,7 @@ routes.get('/', (req, res) => {
 
 routes.get('/counties', processQueries, (req, res) => {
   const stream = byline(fs.createReadStream(__dirname + '/../public/files/diabetes-incidence.csv'));
-  stream.pipe(new CountiesSearchStream(req.options)).pipe(concat(data => { 
+  stream.pipe(new CountiesSearchStream(req.options)).pipe(concat(data => {
     res.json(data);
   }));
 });
@@ -37,7 +37,7 @@ routes.get('/counties', processQueries, (req, res) => {
 
 routes.get('/diabetes-prevalence', processQueries, (req, res) => {
   const stream = byline(fs.createReadStream(__dirname + '/../public/files/diabetes-prevalence.csv'));
-  stream.pipe(new CountiesDataStream(req.options)).pipe(concat(data => { 
+  stream.pipe(new CountiesDataStream(req.options)).pipe(concat(data => {
     data = { years: data[0].years, labels: data[1].labels, data: data.slice(2) };
     res.json(data);
   }));
@@ -45,7 +45,7 @@ routes.get('/diabetes-prevalence', processQueries, (req, res) => {
 
 routes.get('/diabetes-incidence', processQueries, (req, res) => {
   const stream = byline(fs.createReadStream(__dirname + '/../public/files/diabetes-incidence.csv'));
-  stream.pipe(new CountiesDataStream(req.options)).pipe(concat(data => { 
+  stream.pipe(new CountiesDataStream(req.options)).pipe(concat(data => {
     data = { years: data[0].years, labels: data[1].labels, data: data.slice(2) };
     res.json(data);
   }));
@@ -53,7 +53,7 @@ routes.get('/diabetes-incidence', processQueries, (req, res) => {
 
 routes.get('/obesity-prevalence', processQueries, (req, res) => {
   const stream = byline(fs.createReadStream(__dirname + '/../public/files/obesity-prevalence.csv'));
-  stream.pipe(new CountiesDataStream(req.options)).pipe(concat(data => { 
+  stream.pipe(new CountiesDataStream(req.options)).pipe(concat(data => {
     data = { years: data[0].years, labels: data[1].labels, data: data.slice(2) };
     res.json(data);
   }));
@@ -61,7 +61,7 @@ routes.get('/obesity-prevalence', processQueries, (req, res) => {
 
 routes.get('/physical-inactivity', processQueries, (req, res) => {
   const stream = byline(fs.createReadStream(__dirname + '/../public/files/obesity-prevalence.csv'));
-  stream.pipe(new CountiesDataStream(req.options)).pipe(concat(data => { 
+  stream.pipe(new CountiesDataStream(req.options)).pipe(concat(data => {
     data = { years: data[0].years, labels: data[1].labels, data: data.slice(2) };
     res.json(data);
   }));

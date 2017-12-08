@@ -14,20 +14,21 @@ class CountiesSearchStream extends stream.Transform {
   }
 
   optionsExists() {
-    return this.options.filter || this.options.pagination;      
+    return this.options.filter || this.options.pagination;
   }
 
   matchQuery(state, county) {
+    if (!this.options.filter) return false;
     const countyQuery = this.options.filter.county ? this.options.filter.county.toLowerCase() : undefined;
     const stateQuery = this.options.filter.state ? this.options.filter.state.toLowerCase() : undefined;
-    return this.options.filter 
-            && ((countyQuery && county.toLowerCase().includes(countyQuery))
-                || (stateQuery && state.toLowerCase().includes(stateQuery)));
+    return (countyQuery && county.toLowerCase().includes(countyQuery))
+            || (stateQuery && state.toLowerCase().includes(stateQuery));
   }
 
-  inPaginationRange() {    
+  inPaginationRange() {
     const pagination = this.options.pagination;
-    return pagination 
+
+    return pagination
             && pagination.page * pagination.perPage <= this.index
             && this.index < (pagination.page + 1) * pagination.perPage ;
   }
@@ -40,18 +41,18 @@ class CountiesSearchStream extends stream.Transform {
     } else if (!this.headers) {
       this.headers = values;
     } else {
-      const state = values[0];      
-      const fips = values[1];      
+      const state = values[0];
+      const fips = values[1];
       const county = values[2];
       // If there is a query, skip the ones that dont match
       if (!this.optionsExists() || this.matchQuery(state, county) || this.inPaginationRange()) {
         object = { state, county, fips };
       }
-    } 
-    if (Object.keys(object).length > 0) {
-      this.push(object);      
     }
-    this.index += 1;    
+    if (Object.keys(object).length > 0) {
+      this.push(object);
+    }
+    this.index += 1;
     done();
   }
 }

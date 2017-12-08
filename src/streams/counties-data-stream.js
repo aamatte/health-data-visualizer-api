@@ -15,33 +15,34 @@ class CountiesDataStream extends stream.Transform {
 
   getDataByYear(state, county, fips, values) {
     const object = { county, state, fips };
-    for (let i = 0; i < this.years.length - 1; i++) {
+    for (let i = 0; i < this.years.length; i++) {
       object[this.years[i]] = values.slice(i * this.headers.length + 3, (i + 1) * this.headers.length + 3);
     }
     return object;
   }
 
   optionsExists() {
-    return this.options.filter || this.options.pagination;      
+    return this.options.filter || this.options.pagination;
   }
 
   matchQuery(state, county) {
-    if (this.options.filter && this.options.filter.county && this.options.filter.state) {
+    if (!this.options.filter) return false;
+    if (this.options.filter.county && this.options.filter.state) {
       // Query county and state
-      return (this.options.filter.county === county && this.options.filter.state === state)
-    } else if (this.options.filter && this.options.filter.county) {
+      return (this.options.filter.county === county && this.options.filter.state === state);
+    } else if (this.options.filter.county) {
       // Query only county
       return this.options.filter.county === county;
-    } else if (this.options.filter && this.options.filter.state) {
+    } else if (this.options.filter.state) {
       // Query only state
       return this.options.filter.state === state;
     }
     return false;
   }
 
-  inPaginationRange() {    
+  inPaginationRange() {
     const pagination = this.options.pagination;
-    return pagination 
+    return pagination
             && pagination.page * pagination.perPage < this.index
             && (pagination.page + 1) * pagination.perPage > this.index;
   }
@@ -54,22 +55,22 @@ class CountiesDataStream extends stream.Transform {
       object = { years: this.years };
     } else if (!this.headers) {
       // Delete repeated ones
-      const labels = values.filter((elem, pos) => values.indexOf(elem) == pos).slice(3); 
+      const labels = values.filter((elem, pos) => values.indexOf(elem) == pos).slice(3);
       object = { labels };
       this.headers = labels;
     } else {
-      const state = values[0];      
+      const state = values[0];
       const fips = values[1];
       const county = values[2];
       // If there is a query, skip the ones that dont match
       if (!this.optionsExists() || this.matchQuery(state, county) || this.inPaginationRange()) {
         object = this.getDataByYear(state, county, fips, values);
       }
-    } 
+    }
     if (Object.keys(object).length > 0) {
       this.push(object);
     }
-    this.index += 1;    
+    this.index += 1;
     done();
   }
 }
