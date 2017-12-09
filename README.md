@@ -52,7 +52,7 @@ In addition to that, you can update, add, or delete information that is returned
 
 ```sh
 # Clone the project
-git clone GIT_REPO health-data-api
+git clone https://github.com/aamatte/health-data-visualizer-api.git health-data-api
 cd health-data-api
 
 # Install dependencies
@@ -82,8 +82,8 @@ yarn start
 
 - Route: `GET /counties`
 - Query parameters:
-  - county
-  - state
+  - `county`
+  - `state`
 - Example request 
 ```
 GET /counties?state=alabama&county=Bald`
@@ -136,10 +136,10 @@ GET /counties?state=alabama&county=Bald`
 ### Get data
 - Route `GET /data-path-here`
 - Query parameters:
-  - county
-  - state
-  - page
-  - perPage
+  - `county`
+  - `state`
+  - `page`
+  - `perPage`
 - Example request 1 
 ```
 GET /diabetes-incidence?state=alabama&county=Bald`
