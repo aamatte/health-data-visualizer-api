@@ -27,11 +27,12 @@ const routes = Router();
  * GET home page
  */
 routes.get('/', (req, res) => {
-  res.render('index', { title: 'Health data visualizer' });
+  res.render('public/index');
 });
 
 const availableFiles = fs.readdirSync(DATA_FILES_DIRECTORY);
 
+// Return counties that match the query
 routes.get('/counties', processQueries, (req, res) => {
   if (!availableFiles || availableFiles.length === 0) {
     res.status(404).json({ message: 'No data available' });
@@ -43,22 +44,22 @@ routes.get('/counties', processQueries, (req, res) => {
 });
 
 routes.get('/available-data', (req, res) => {
-  fs.readdir(DATA_FILES_DIRECTORY, (err, files) => {
-    const availableData = files.map((file, index) => {
-      const route = file.split('.')[0];
-      const name = file.split('.')[0].replace('-', ' ');
-      return ({
-        key: index,
-        path: route,
-        name: `${name.charAt(0).toUpperCase()}${name.slice(1)}`,
-      });
+  const availableData = availableFiles.map((file, index) => {
+    const route = file.split('.')[0];
+    const name = file.split('.')[0].replace('-', ' ');
+    return ({
+      key: index,
+      path: route,
+      name: `${name.charAt(0).toUpperCase()}${name.slice(1)}`, // Capitalize string
     });
-    res.json(availableData);
   });
+  res.json(availableData);
 });
 
+// Generate routes dynamically according to the available files.
 availableFiles.forEach((file) => {
   const [route] = file.split('.');
+  // Return counties data that match the query
   routes.get(`/${route}`, processQueries, (req, res) => {
     const stream = byline(fs.createReadStream(path.resolve(__dirname, DATA_FILES_DIRECTORY, file)));
     stream.pipe(new CountiesDataStream(req.options)).pipe(concat((data) => {

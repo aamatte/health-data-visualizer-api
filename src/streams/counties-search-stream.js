@@ -1,14 +1,23 @@
 const stream = require('stream');
 
+/*
+ * CountiesSearchStream is a transform stream that process and stream each line of a given file
+ * that meet the format specified at the README.md file. Specifically, extracts the county with
+ * it's corresponding state and fips.
+ */
 class CountiesSearchStream extends stream.Transform {
   constructor(options = {}) {
     super({
       readableObjectMode: true,
       writableObjectMode: true,
     });
+    // Options can have two objects: filter and pagination.
     this.options = options;
+    // Headers is the labels/specific data available.
     this.headers = null;
+    // Yearly available data
     this.years = null;
+    // Counties data starts at index 2
     this.index = -2;
   }
 

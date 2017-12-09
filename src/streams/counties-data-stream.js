@@ -1,20 +1,31 @@
 const stream = require('stream');
 
+/*
+ * CountiesDataStream is a transform stream that process and stream each line of a given file
+ * that meet the format specified at the README.md file. Specifically, extracts yearly data,
+ * data available (labels), and county specific data.
+ */
 class CountiesDataStream extends stream.Transform {
   constructor(options = {}) {
     super({
       readableObjectMode: true,
       writableObjectMode: true,
     });
+    // Options can have two objects: filter and pagination.
     this.options = options;
+    // Headers is the labels/specific data available.
     this.headers = null;
+    // Yearly available data
     this.years = null;
+    // Counties data starts at index 2
     this.index = -2;
   }
 
   getDataByYear(state, county, fips, values) {
     const object = { county, state, fips };
     for (let i = 0; i < this.years.length; i += 1) {
+      // First 3 values are county identification data, after that are county indicators
+      // Slice specific year values and asign them to the corresponding year
       object[this.years[i]] =
         values.slice((i * this.headers.length) + 3, ((i + 1) * this.headers.length) + 3);
     }
