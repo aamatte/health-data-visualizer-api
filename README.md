@@ -4,20 +4,12 @@ This API is meant to provide information about several health indicators in ever
 
 ## Table of contents
 
-- [Build status](#build-status)
 - [Technology used](#technology-used)
 - [Features](#features)
 - [Getting started](#getting-started)
 - [Deployment](#deployment)
 - [API reference](#api-reference)
 - [Tests](#tests)
-
-## Build status
-Build status of continus integration i.e. travis, appveyor etc. Ex. - 
-
-[![Build Status](https://travis-ci.org/akashnimare/foco.svg?branch=master)](https://travis-ci.org/akashnimare/foco)
-[![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/akashnimare/foco?branch=master&svg=true)](https://ci.appveyor.com/project/akashnimare/foco/branch/master)
-
  
 ## Technology used
 
