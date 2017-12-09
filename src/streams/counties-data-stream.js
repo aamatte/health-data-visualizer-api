@@ -1,10 +1,9 @@
 const stream = require('stream');
 
 class CountiesDataStream extends stream.Transform {
-
   constructor(options = {}) {
     super({
-      readableObjectMode : true,
+      readableObjectMode: true,
       writableObjectMode: true,
     });
     this.options = options;
@@ -15,8 +14,9 @@ class CountiesDataStream extends stream.Transform {
 
   getDataByYear(state, county, fips, values) {
     const object = { county, state, fips };
-    for (let i = 0; i < this.years.length; i++) {
-      object[this.years[i]] = values.slice(i * this.headers.length + 3, (i + 1) * this.headers.length + 3);
+    for (let i = 0; i < this.years.length; i += 1) {
+      object[this.years[i]] =
+        values.slice((i * this.headers.length) + 3, ((i + 1) * this.headers.length) + 3);
     }
     return object;
   }
@@ -41,7 +41,7 @@ class CountiesDataStream extends stream.Transform {
   }
 
   inPaginationRange() {
-    const pagination = this.options.pagination;
+    const { pagination } = this.options;
     return pagination
             && pagination.page * pagination.perPage < this.index
             && (pagination.page + 1) * pagination.perPage > this.index;
@@ -51,11 +51,11 @@ class CountiesDataStream extends stream.Transform {
     const values = chunk.toString('utf8').split(',').filter(e => e !== '');
     let object = {};
     if (!this.years) {
-      this.years = values.filter(v => parseInt(v));
+      this.years = values.filter(v => parseInt(v, 10));
       object = { years: this.years };
     } else if (!this.headers) {
       // Delete repeated ones
-      const labels = values.filter((elem, pos) => values.indexOf(elem) == pos).slice(3);
+      const labels = values.filter((elem, pos) => values.indexOf(elem) === pos).slice(3);
       object = { labels };
       this.headers = labels;
     } else {

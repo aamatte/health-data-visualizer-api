@@ -1,10 +1,9 @@
 const stream = require('stream');
 
 class CountiesSearchStream extends stream.Transform {
-
   constructor(options = {}) {
     super({
-      readableObjectMode : true,
+      readableObjectMode: true,
       writableObjectMode: true,
     });
     this.options = options;
@@ -19,25 +18,28 @@ class CountiesSearchStream extends stream.Transform {
 
   matchQuery(state, county) {
     if (!this.options.filter) return false;
-    const countyQuery = this.options.filter.county ? this.options.filter.county.toLowerCase() : undefined;
-    const stateQuery = this.options.filter.state ? this.options.filter.state.toLowerCase() : undefined;
+    const countyQuery = this.options.filter.county ?
+      this.options.filter.county.toLowerCase() :
+      undefined;
+    const stateQuery = this.options.filter.state ?
+      this.options.filter.state.toLowerCase() :
+      undefined;
     return (countyQuery && county.toLowerCase().includes(countyQuery))
             || (stateQuery && state.toLowerCase().includes(stateQuery));
   }
 
   inPaginationRange() {
-    const pagination = this.options.pagination;
-
+    const { pagination } = this.options;
     return pagination
             && pagination.page * pagination.perPage <= this.index
-            && this.index < (pagination.page + 1) * pagination.perPage ;
+            && this.index < (pagination.page + 1) * pagination.perPage;
   }
 
   _transform(chunk, encoding, done) {
     const values = chunk.toString('utf8').split(',').filter(e => e !== '');
     let object = {};
     if (!this.years) {
-      this.years = values.filter(v => parseInt(v));
+      this.years = values.filter(v => parseInt(v, 10));
     } else if (!this.headers) {
       this.headers = values;
     } else {
