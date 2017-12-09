@@ -30,10 +30,16 @@ routes.get('/', (req, res) => {
   res.render('index', { title: 'Health data visualizer' });
 });
 
-// TODO: Select the file chosen from available ones
+const availableFiles = fs.readdirSync(DATA_FILES_DIRECTORY);
+
 routes.get('/counties', processQueries, (req, res) => {
-  const stream = byline(fs.createReadStream(path.resolve(__dirname, '../public/files/diabetes-incidence.csv')));
-  stream.pipe(new CountiesSearchStream(req.options)).pipe(concat(data => res.json(data)));
+  if (!availableFiles || availableFiles.length === 0) {
+    res.status(404).json({ message: 'No data available' });
+  } else {
+    const filePath = path.resolve(__dirname, DATA_FILES_DIRECTORY, availableFiles[0]);
+    const stream = byline(fs.createReadStream(filePath));
+    stream.pipe(new CountiesSearchStream(req.options)).pipe(concat(data => res.json(data)));
+  }
 });
 
 routes.get('/available-data', (req, res) => {
@@ -51,7 +57,7 @@ routes.get('/available-data', (req, res) => {
   });
 });
 
-fs.readdirSync(DATA_FILES_DIRECTORY).forEach((file) => {
+availableFiles.forEach((file) => {
   const [route] = file.split('.');
   routes.get(`/${route}`, processQueries, (req, res) => {
     const stream = byline(fs.createReadStream(path.resolve(__dirname, DATA_FILES_DIRECTORY, file)));
