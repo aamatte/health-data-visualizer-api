@@ -1,54 +1,214 @@
-# Express.js with Babel Boilerplate
+# County health data API
 
-[![Code Climate](https://codeclimate.com/github/vmasto/express-babel/badges/gpa.svg)](https://codeclimate.com/github/vmasto/express-babel)
-[![Dependencies Status](https://david-dm.org/vmasto/express-babel/status.svg)](https://david-dm.org/vmasto/express-babel)
-[![Dev Dependencies Status](https://david-dm.org/vmasto/express-babel/dev-status.svg)](https://david-dm.org/vmasto/express-babel)
-[![NSP Status](https://nodesecurity.io/orgs/vmasto/projects/d8089487-4f0e-4f69-abb1-938c6de1e6a7/badge)](https://nodesecurity.io/orgs/vmasto/projects/d8089487-4f0e-4f69-abb1-938c6de1e6a7)
+This API is meant to provide information about several health indicators in every county of the United States. The initial data was obtained from the [Center for Disease Control and Prevention](https://www.cdc.gov/diabetes/data/countydata/countydataindicators.html).
 
-A mostly unopinionated starter project for using Babel and ES2017+ features in a Node.js server environment as well as providing linting and testing solutions. It provides the setup for compiling, linting and testing your code but doesn't make any further assumptions on how your project should be structured.
+## Table of contents
 
-It's a small improvement over [Babel's official approach](https://github.com/babel/example-node-server) and [express-generator](https://expressjs.com/en/starter/generator.html).
+- [Build status](#build-status)
+- [Technology used](#technology-used)
+- [Features](#features)
+- [Getting started](#getting-started)
+- [Deployment](#deployment)
+- [API reference](#api-reference)
+- [Tests](#tests)
 
-Make sure you read the FAQ for more details and info.
+## Build status
+Build status of continus integration i.e. travis, appveyor etc. Ex. - 
 
-### Features:
+[![Build Status](https://travis-ci.org/akashnimare/foco.svg?branch=master)](https://travis-ci.org/akashnimare/foco)
+[![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/akashnimare/foco?branch=master&svg=true)](https://ci.appveyor.com/project/akashnimare/foco/branch/master)
+
+ 
+## Technology used
+
 - [Express.js](https://expressjs.com/) as the web framework.
 - ES2017+ support with [Babel](https://babeljs.io/).
 - Automatic polyfill requires based on environment with [babel-preset-env](https://github.com/babel/babel-preset-env).
 - Linting with [ESLint](http://eslint.org/).
-- Testing with [Jest](https://facebook.github.io/jest/).
-- [Quick deployment guide](DEPLOYMENT.md) for Heroku, AWS Elastic Beanstalk, and App Engine.
+
+## Features
+
+The API has the following features:
+- Return all United States conties.
+- Filter United States conties by county name and state.
+- Return the available indicators from each county.
+- Return the available indicators that can be queried.
+
+In addition to that, you can update, add, or delete information that is returned by the API by updating, adding or deleting files from `public/files`. This changes will dinamlically change the routes available. The files in the mentioned directory must follow some rules:
+- Must be a CSV comma separated file
+- Must follow the structure:
+
+| | | | | | | | | | |
+|-|-|-|-|-|-|-|-|-|-|
+| Title      |            |           | year1   |     |         | year2   |     |        | ... |
+| State      | FIPS Codes | County    | label 1 | ... | label n | label 1 | ... | label n| ... |
+| StateA     | XXXX       | CountyX   | data 1  | ... | data 2  | data 3  | ... | data  m| ... |
+| StateB     | YYYY       | CountyY   | data 1  | ... | data 2  | data 3  | ... | data  m| ... |
+| ...        | ...        | ...       | data 1  | ... | data 2  | data 3  | ... | data  m| ... |
+
+- Example:
+
+| | | | | | | | | | |
+|-|-|-|-|-|-|-|-|-|-|
+| Diabetes   |            |           | 2004                |     |                | 2005               |     |               | ... |
+| State      | FIPS Codes | County    | number of new cases | ... | rate per 1000 | number of new cases | ... | rate per 1000 | ... |
+| Alabama    | 1001       | Autaga    | 425                 | ... | 14.2          | 471                 | ... | 15.6          | ... |
+| Alabama    | 1003       | Baldwin   | 1103                | ... | 10.3          | 1080                | ... | 9.7           | ... |
 
 ## Getting started
 
+
 ```sh
 # Clone the project
-git clone git@github.com:vmasto/express-babel.git
-cd express-babel
-
-# Make it your own
-rm -rf .git && git init && npm init
+git clone GIT_REPO health-data-api
+cd health-data-api
 
 # Install dependencies
-npm install
-
-# or if you're using Yarn
 yarn
-```
 
-_If you don't use [Yarn](https://yarnpkg.com/) you can just replace `yarn` with `npm` in the commands that follow._
-
-Then you can begin development:
-
-```sh
+# Run development
 yarn run dev
 ```
 
-This will launch a [nodemon](https://nodemon.io/) process for automatic server restarts when your code changes.
+### Deployment
 
-### Testing
+To generate the production build:
 
-Testing is powered by [Jest](https://facebook.github.io/jest/). This project also uses [supertest](https://github.com/visionmedia/supertest) for demonstrating a simple routing smoke test suite. Feel free to remove supertest entirely if you don't wish to use it.
+```sh
+yarn run build
+```
+
+To start the production API: 
+
+```sh
+yarn start
+```
+
+## API Reference
+
+### Get counties
+
+- Route: `GET /counties`
+- Query parameters:
+  - county
+  - state
+- Example request 
+```
+GET /counties?state=alabama&county=Bald`
+```
+- Example body response:
+```json
+[
+  {
+    "state": "Alabama",
+    "county": "Baldor County",
+    "fips": "01101"
+  },
+  {
+    "state": "Alabama",
+    "county": "Baldwin County",
+    "fips": "01003"
+  }
+]
+```
+
+### Get available indicators/data
+
+- Route: `GET /available-data`
+- Example body response:
+```json
+[
+  {
+    "key": 0,
+    "path": "diabetes-incidence",
+    "name": "Diabetes incidence"
+  },
+  {
+    "key": 1,
+    "path": "diabetes-prevalence",
+    "name": "Diabetes prevalence"
+  },
+  {
+    "key": 2,
+    "path": "obesity-prevalence",
+    "name": "Obesity prevalence"
+  },
+  {
+    "key": 3,
+    "path": "physical-inactivity",
+    "name": "Physical inactivity"
+  }
+]
+```
+
+### Get data
+- Route `GET /data-path-here`
+- Query parameters:
+  - county
+  - state
+  - page
+  - perPage
+- Example request 1 
+```
+GET /diabetes-incidence?state=alabama&county=Bald`
+```
+- Example request 2
+
+```
+GET /diabetes-incidence?page=1$perPage=20
+```
+- Example body response:
+```json
+{
+  "years": [
+    "2009",
+    "2010",
+    "2011",
+    "2012",
+    "2013"
+  ],
+  "labels": [
+    "number (men)",
+    "percent (men)",
+    "lower confidence limit (men)",
+    "upper confidence limit (men)",
+    "age-adjusted percent (men)",
+    "age-adjusted lower confidence limit (men)",
+    "age-adjusted upper confidence limit (men)",
+    "number (women)",
+    "percent (women)",
+    "lower confidence limit (women)",
+    "upper confidence limit (women)",
+    "age-adjusted percent (women)",
+    "age-adjusted lower confidence limit (women)",
+    "age-adjusted upper confidence limit (women)"
+  ],
+  "data": [
+    {
+      "2009": [ "2149", "12.8", "10", "16", "12.4", "9.8", "15.6", "2189", "11.9", "9.1", "15.2", "11.1", "8.5", "14.2"],
+      "2010": [ "2224", "12.1", "9.5", "15.2", "11.6", "9.2", "14.6", "2336", "11.6", "8.9", "14.7", "10.9", "8.3", "13.8"],
+      "2011": [ "2345", "12.4", "9.8", "15.5", "11.9", "9.4", "14.9", "2403", "11.7", "8.9", "15.2", "10.9", "8.2", "14.2"],
+      "2012": [ "2350", "12.5", "9.8", "15.6", "11.7", "9.2", "14.7", "2373", "11.5", "8.8", "14.6", "10.6", "8", "13.4"],
+      "2013": [ "2577", "13.6", "10.8", "16.6", "12.8", "10.2", "15.5", "2567", "12.4", "9.7", "15.4", "11.3", "8.7", "14.2"],
+      "county": "Autauga County",
+      "state": "Alabama",
+      "fips": "01001"
+    },
+    {
+      "2009": [ "2149", "12.8", "10", "16", "12.4", "9.8", "15.6", "2189", "11.9", "9.1", "15.2", "11.1", "8.5", "14.2"],
+      "2010": [ "2224", "12.1", "9.5", "15.2", "11.6", "9.2", "14.6", "2336", "11.6", "8.9", "14.7", "10.9", "8.3", "13.8"],
+      "2011": [ "2345", "12.4", "9.8", "15.5", "11.9", "9.4", "14.9", "2403", "11.7", "8.9", "15.2", "10.9", "8.2", "14.2"],
+      "2012": [ "2350", "12.5", "9.8", "15.6", "11.7", "9.2", "14.7", "2373", "11.5", "8.8", "14.6", "10.6", "8", "13.4"],
+      "2013": [ "2577", "13.6", "10.8", "16.6", "12.8", "10.2", "15.5", "2567", "12.4", "9.7", "15.4", "11.3", "8.7", "14.2"],
+      "county": "Baldor County",
+      "state": "Alabama",
+      "fips": "01101"
+    }
+  ]
+}
+```
+
+## Tests
 
 Start the test runner in watch mode with:
 
@@ -56,79 +216,3 @@ Start the test runner in watch mode with:
 yarn test
 ```
 
-You can also generate coverage with:
-
-```sh
-yarn test -- --coverage
-```
-
-(the extra double hyphen `--` is necessary).
-
-### Linting
-
-Linting is set up using [ESLint](http://eslint.org/). It uses ESLint's default [eslint:recommended](https://github.com/eslint/eslint/blob/master/conf/eslint.json) rules. Feel free to use your own rules and/or extend another popular linting config (e.g. [airbnb's](https://www.npmjs.com/package/eslint-config-airbnb) or [standard](https://github.com/feross/eslint-config-standard)).
-
-Begin linting in watch mode with:
-
-```sh
-yarn run lint
-```
-
-To begin linting and start the server simultaneously, edit the `package.json` like this:
-
-```
-"dev": "nodemon src/index.js --exec \"node -r dotenv/config -r babel-register\" | npm run lint"
-```
-
-### Environmental variables in development
-
-The project uses [dotenv](https://www.npmjs.com/package/dotenv) for setting environmental variables during development. Simply copy `.env.example`, rename it to `.env` and add your env vars as you see fit. 
-
-It is **strongly** recommended **never** to check in your .env file to version control. It should only include environment-specific values such as database passwords or API keys used in development. Your production env variables should be different and be set differently depending on your hosting solution. `dotenv` is only for development.
-
-### Deployment
-
-Deployment is specific to hosting platform/provider but generally:
-
-```sh
-yarn run build
-```
-
-will compile your src into `/dist`, and 
-
-```sh
-yarn start
-```
-
-will run `build` (via the `prestart` hook) and start the compiled application from the `/dist` folder.
-
-The last command is generally what most hosting providers use to start your application when deployed, so it should take care of everything.
-
-You can find small guides for Heroku, App Engine and AWS in [the deployment](DEPLOYMENT.md) document.
-
-## FAQ
-
-**Where is all the configuration for ESLint, Jest and Babel?**
-
-In `package.json`. Feel free to extract them in separate respective config files if you like.
-
-**Why are you using `babel-register` instead of `babel-node`?**
-
-`babel-node` contains a small "trap", it loads Babel's [polyfill](https://babeljs.io/docs/usage/polyfill/) by default. This means that if you use something that needs to be polyfilled, it'll work just fine in development (because `babel-node` polyfills it automatically) but it'll break in production because it needs to be explicitely included in Babel's CLI which handles the final build.
-
-In order to avoid such confusions, `babel-register` is a more sensible approach in keeping the development and production runtimes equal. By using [babel-preset-env](https://github.com/babel/babel-preset-env) only code that's not supported by the running environment is transpiled and any polyfills required are automatically inserted.
-
-**Should I use this?**
-
-Full disclosure: If you have to ask perhaps you should reconsider. There is some debate on whether to use Babel-transpiled code on the server or not. Personally, I think it's fine and I've found this setup to be a sensible approach in doing so. That said, I'd suggest to take anything you read online with a grain of salt and refrain from blindly using boilerplates without first investigating personally.
-
-Node is very rapidly converging with the latest ECMAScript specification, and there's mostly full native support for ES2015 and ES2016. The need to transpile on the server is way smaller nowadays, albeit the language is constantly improving and transpiling will probably always be a part of our workflow. At the time of this writing the main benefits are mainly ES6 module syntax and async/await without flags.
-
-In any case, you can simply remove transpilation and keep everything else that this kit has to offer.
-
-If you see anything that needs improvement feel free to open an issue for discussion!
-
-You can also find me on twitter at [@vmasto](https://twitter.com/vmasto).
-
-## License
-MIT License. See the [LICENSE](LICENSE) file.

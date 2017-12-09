@@ -30,6 +30,7 @@ routes.get('/', (req, res) => {
   res.render('index', { title: 'Health data visualizer' });
 });
 
+// TODO: Select the file chosen from available ones
 routes.get('/counties', processQueries, (req, res) => {
   const stream = byline(fs.createReadStream(path.resolve(__dirname, '../public/files/diabetes-incidence.csv')));
   stream.pipe(new CountiesSearchStream(req.options)).pipe(concat(data => res.json(data)));
